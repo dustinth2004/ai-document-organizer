@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import re
@@ -246,14 +247,16 @@ def _execute_live_run_organization(
                     print(f"  Error moving '{filename}' to '{category_path}': {e}")
     return actions_performed
 
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:] # Use actual command-line arguments if none provided
 
-if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Organize documents using Hugging Face zero-shot classification.")
     parser.add_argument("target_folder", help="The full path to the folder containing your documents.")
     parser.add_argument("--dry-run", action="store_true", help="Run in DRY RUN mode (show actions, no changes).")
     parser.add_argument("--filter-regex", type=str, help="Optional: A regular expression to filter filenames (e.g., '.*\\.pdf$' to process only PDF files).")
     
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     target_folder = args.target_folder
     is_dry_run = args.dry_run
@@ -294,3 +297,7 @@ if __name__ == "__main__":
         print(f"\n--- Organization Complete ({'DRY RUN' if is_dry_run else 'LIVE RUN'}) ---")
         print(f"Total files considered for processing: {files_processed} actions: {actions_performed}")
 
+
+
+if __name__ == "__main__":
+    main()
