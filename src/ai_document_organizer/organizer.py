@@ -42,10 +42,17 @@ NEEDS_REVIEW_FOLDER_NAME = "_Needs Manual Review_"
 HYPOTHESIS_TEMPLATE = "This document belongs to the category of {}." # New top-level constant
 
 def extract_title_from_filename(filename: str) -> str:
-    """
-    Extracts a cleaner title from the filename by removing the extension and common trailing identifiers like ISBNs.
-    Example: "My Awesome Book-9781234567890.pdf" -> "My Awesome Book"
-    Example: "Another Document.docx" -> "Another Document"
+    """Extracts a clean title from a filename for better classification.
+
+    This function removes the file extension and common trailing identifiers
+    such as ISBNs, volume numbers, and edition information. If cleaning
+    results in an empty string, it returns the filename without the extension.
+
+    Args:
+        filename: The original filename (e.g., "My Book-9781234567890.pdf").
+
+    Returns:
+        A cleaned-up title string (e.g., "My Book").
     """
     name_without_ext = os.path.splitext(filename)[0]
     
@@ -62,10 +69,14 @@ def extract_title_from_filename(filename: str) -> str:
     return cleaned_title
 
 def load_classifier_model() -> Any:
-    """
-    Loads the Hugging Face zero-shot classification model.
-    Attempts to use GPU if available, otherwise falls back to CPU.
-    Returns the classifier pipeline or None if an error occurs.
+    """Loads and initializes the Hugging Face zero-shot classification pipeline.
+
+    This function attempts to use a CUDA-enabled GPU if PyTorch is installed
+    and a GPU is available. If not, it falls back to the CPU.
+
+    Returns:
+        A Hugging Face pipeline object for zero-shot classification, or None
+        if the model fails to load.
     """
     print(f"Loading classification model '{MODEL_NAME}'. This may take a while on the first run...")
 
@@ -107,11 +118,22 @@ def plan_book_organization(
     classifier: Any,
     filename_regex: Optional[str] = None # New optional argument for regex filter
 ) -> Dict[str, List[str]]:
-    """
-    Plans the organization of files. It classifies each file and determines
-    its intended destination, returning a dictionary where keys are categories
-    and values are lists of filenames belonging to that category.
-    No file system operations are performed in this function.
+    """Scans a folder and plans the organization of files based on classification.
+
+    This function iterates through files in the given path, classifies them
+    using the provided classifier, and creates a plan for moving them into
+    category folders. No actual file operations are performed.
+
+    Args:
+        folder_path: The absolute or relative path to the folder of documents.
+        categories: A list of category labels for classification.
+        min_confidence: The minimum confidence score required for classification.
+        classifier: The Hugging Face zero-shot classification pipeline.
+        filename_regex: An optional regex pattern to filter which files to process.
+
+    Returns:
+        A dictionary mapping each category to a list of filenames planned
+        to be moved into it.
     """
     if not os.path.isdir(folder_path):
         print(f"Error: Folder '{folder_path}' not found.")
@@ -184,10 +206,14 @@ def _execute_dry_run_organization(
     folder_path: str,
     organized_structure: Dict[str, List[str]]
 ) -> int:
-    """
-    Executes the dry run logic for file organization.
-    Prints the proposed organization structure in a tree-like view.
-    Returns the count of proposed moves/folder creations.
+    """Prints a summary of the planned file organization without moving files.
+
+    Args:
+        folder_path: The path to the folder of documents.
+        organized_structure: A dictionary with categories as keys and filenames as values.
+
+    Returns:
+        The total number of file moves that would be performed in a live run.
     """
     print("\n--- DRY RUN MODE ENABLED: No files will be moved or folders created. ---")
     print("\nProposed Organization Structure (Tree View):")
@@ -211,10 +237,17 @@ def _execute_live_run_organization(
     folder_path: str,
     organized_structure: Dict[str, List[str]]
 ) -> int:
-    """
-    Executes the live run logic for file organization.
-    Performs actual file system operations (creating folders, moving files).
-    Returns the count of successfully moved files/ensured folders.
+    """Executes the file organization plan by moving files.
+
+    This function creates category folders if they don't exist and moves
+    the files according to the `organized_structure` plan.
+
+    Args:
+        folder_path: The path to the folder of documents.
+        organized_structure: A dictionary with categories as keys and filenames as values.
+
+    Returns:
+        The total number of files successfully moved.
     """
     print("\n--- LIVE RUN MODE ENABLED: Files will be moved and folders created. ---")
     os.makedirs(os.path.join(folder_path, NEEDS_REVIEW_FOLDER_NAME), exist_ok=True) # Ensure review folder exists
@@ -247,11 +280,20 @@ def _execute_live_run_organization(
                     print(f"  Error moving '{filename}' to '{category_path}': {e}")
     return actions_performed
 
-def main(argv=None):
-    if argv is None:
-        argv = sys.argv[1:] # Use actual command-line arguments if none provided
+def main(argv: Optional[List[str]] = None):
+    """Main function to run the document organizer from the command line.
 
-    parser = argparse.ArgumentParser(description="Organize documents using Hugging Face zero-shot classification.")
+    Parses command-line arguments and orchestrates the classification and
+    organization of documents.
+
+    Args:
+        argv: A list of command-line arguments, primarily for testing.
+              If None, `sys.argv[1:]` is used.
+    """
+    if argv is None:
+        argv = sys.argv[1:]
+
+    parser = argparse.ArgumentParser(description="Organize documents using AI.")
     parser.add_argument("target_folder", help="The full path to the folder containing your documents.")
     parser.add_argument("--dry-run", action="store_true", help="Run in DRY RUN mode (show actions, no changes).")
     parser.add_argument("--filter-regex", type=str, help="Optional: A regular expression to filter filenames (e.g., '.*\\.pdf$' to process only PDF files).")
