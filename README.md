@@ -22,7 +22,7 @@ Before running the script, ensure you have Python 3.8+ installed.
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/vyaslav/ai-document-organizer
+    git clone https://github.com/dustinth2004/ai-document-organizer
     cd ai-document-organizer
     ```
 

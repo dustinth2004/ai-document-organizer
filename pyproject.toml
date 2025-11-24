@@ -17,13 +17,13 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "transformers",
-    "torch", # Or tensorflow, depending on your choice
+    "transformers>=4.30.0,<5.0.0",
+    "torch>=2.0.0,<3.0.0",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/vyaslav/ai-document-organizer"
-"Bug Tracker" = "https://github.com/vyaslav/ai-document-organizer/issues"
+"Homepage" = "https://github.com/dustinth2004/ai-document-organizer"
+"Bug Tracker" = "https://github.com/dustinth2004/ai-document-organizer/issues"
 
 [project.scripts]
 ai-organizer = "ai_document_organizer.organizer:main" 
